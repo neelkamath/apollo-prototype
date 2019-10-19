@@ -1,0 +1,208 @@
+openapi: 3.0.2
+info:
+  title: Apollo
+  version: '0'
+  description: Generates bus routes
+  contact:
+    name: Neel Kamath
+    email: neelkamath@icloud.com
+    url: https://github.com/neelkamath/apollo
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://apollo.herokuapp.com
+    description: This is a temporary development server which may be offline or serving a different API in the future.
+paths:
+  /tag:
+    get:
+      tags: [tag]
+      description: Gets all tags
+      operationId: getTags
+      responses:
+        200:
+          $ref: '#/components/responses/TagsResponse'
+    post:
+      tags: [tag]
+      description: Create a tag
+      operationId: createTag
+      requestBody:
+        content:
+          application/json:
+            example:
+              tag: 2nd Semester
+            schema:
+              type: object
+              properties:
+                tag:
+                  type: string
+              required: [tag]
+      responses:
+        200:
+          description: Created tag
+    delete:
+      tags: [tag]
+      description: Delete tag
+      operationId: deleteTag
+      requestBody:
+        content:
+          application/json:
+            example:
+              tag: 2nd Semester
+            schema:
+              type: object
+              properties:
+                tag:
+                  type: string
+              required: [tag]
+      responses:
+        200:
+          description: Tag deleted
+  /user:
+    get:
+      tags: [user]
+      description: Gets all users
+      operationId: getUsers
+      responses:
+        200:
+          $ref: '#/components/responses/UsersResponse'
+    post:
+      tags: [user]
+      description: Create a user
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            example:
+              name: Neel Kamath
+              id: PES2201800467
+              address: 311/3, 23rd Cross, 2nd Main, 6th Block, Jayanagar, Bangalore, Karnataka, India
+              tags: [2nd Year, CSE]
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                id:
+                  type: string
+                address:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+              required: [name, id, tags, address]
+      responses:
+        200:
+          description: Created user
+    delete:
+      tags: [user]
+      description: Delete user
+      operationId: deleteUser
+      requestBody:
+        content:
+          application/json:
+            example:
+              id: PES2201800467
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+              required: [id]
+      responses:
+        200:
+          description: User deleted
+  /generate:
+    post:
+      tags: [generate]
+      description: Generate bus routes
+      operationId: generateRoute
+      requestBody:
+        content:
+          application/json:
+            example:
+              tags: [CSE, 2nd Semester]
+            schema:
+              type: object
+              properties:
+                tags:
+                  description: The bus routes will be generated only for people having these tags.
+                  type: array
+                  items:
+                    type: string
+              required: [tags]
+      responses:
+        200:
+          description: Generated routes
+          content:
+            application/json:
+              example:
+                routes:
+                  - route: 1
+                    name: Neel Kamath
+                    id: PES2201800467
+              schema:
+                type: object
+                properties:
+                  routes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        route:
+                          type: integer
+                          description: Route number
+                        name:
+                          type: string
+                          description: Name of person going in this route
+                        id:
+                          type: string
+                          description: id of person going in this route
+                      required: [route, name, id]
+                required: [routes]
+components:
+  responses:
+    TagsResponse:
+      description: Every tag
+      content:
+        application/json:
+          schema:
+            example:
+              tags: [CSE, 3rd Semester, 7th Semester, ME]
+            type: object
+            properties:
+              tags:
+                type: array
+                items:
+                  type: string
+            required: [tags]
+    UsersResponse:
+      description: Every user
+      content:
+        application/json:
+          schema:
+            example:
+              users:
+                - name: Neel Kamath
+                  id: PES2201800467
+                  address: 311/3, 23rd Cross, 2nd Main, 6th Block, Jayanagar, Bangalore, Karnataka, India
+                  tags: [CSE, 2nd Year]
+            properties:
+              users:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    id:
+                      type: string
+                    address:
+                      type: string
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                  required: [name, id, tags, address]
+            required: [users]

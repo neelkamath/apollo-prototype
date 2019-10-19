@@ -1,0 +1,163 @@
+{
+  "arrival": {
+    "name": "PESU, Electronic City Campus",
+    "geocode": {
+      "longitude": 77.6727,
+      "latitude": 12.8458
+    },
+    "farthestDestination": 37.343199999999996,
+    "radius": 38
+  },
+  "destinations": [
+    {
+      "id": 1,
+      "name": "Bill Gates",
+      "address": "Vinayak Nagar, Nyanappana Halli, Arekere, Bengaluru",
+      "geocode": {
+        "longitude": 77.610995,
+        "latitude": 12.97
+      },
+      "distance": 16.5182
+    },
+    {
+      "id": 2,
+      "name": "Nikita",
+      "address": "Flat No SF1, Amrita Nagar Phase 3, Choodasandra, Amrita Nagar, Choodasandra, Kasavanahalli, Bangalore",
+      "geocode": {
+        "longitude": 77.6774,
+        "latitude": 12.892025
+      },
+      "distance": 8.5821
+    },
+    {
+      "id": 3,
+      "name": "Pavan R.",
+      "address": "Chikkanayakanahalli, Choodasandra, Bengaluru",
+      "geocode": {
+        "longitude": 77.683376,
+        "latitude": 12.883959
+      },
+      "distance": 7.3971
+    },
+    {
+      "id": 4,
+      "name": "Arjun Adappa",
+      "address": "32/1, Lavakusha Nagar, Konappana Agrahara, Electronic City, Bangalore",
+      "geocode": {
+        "longitude": 77.660475,
+        "latitude": 12.852426
+      },
+      "distance": 2.1311
+    },
+    {
+      "id": 5,
+      "name": "Roshan",
+      "address": "32, Neeladri Rd, Karuna Nagar, Electronics City Phase 1, Bangalore",
+      "geocode": {
+        "longitude": 77.659441,
+        "latitude": 12.840956
+      },
+      "distance": 3.4432
+    },
+    {
+      "id": 6,
+      "name": "Arjun Shekhar",
+      "address": "Pride Vatika Main Rd, Bukkasagara, Bangalore",
+      "geocode": {
+        "longitude": 77.619258,
+        "latitude": 12.780224
+      },
+      "distance": 21.8436
+    },
+    {
+      "id": 7,
+      "name": "Darsana",
+      "address": "4th Main Rd, Guru, Raghavendra Layout, JP Nagar 7th Phase, Basavanagudi, Bengaluru",
+      "geocode": {
+        "longitude": 77.581853,
+        "latitude": 12.890971
+      },
+      "distance": 16.0712
+    },
+    {
+      "id": 8,
+      "name": "Aditya Kamath",
+      "address": "311/3, 23rd Cross, 2nd Main, 6th Block, Jayanagar, Bangalore",
+      "geocode": {
+        "longitude": 77.56029,
+        "latitude": 12.97021
+      },
+      "distance": 37.343199999999996
+    },
+    {
+      "id": 9,
+      "name": "Neel Kamath",
+      "address": "311/3, 23rd Cross, 2nd Main, 6th Block, Jayanagar, Bangalore",
+      "geocode": {
+        "longitude": 77.56029,
+        "latitude": 12.97021
+      },
+      "distance": 37.343199999999996
+    },
+    {
+      "id": 10,
+      "name": "Adarsh",
+      "address": "No. 3, Kadirenahalli,, Outer Ring Rd, Banashankari Stage II, Banashankari, Bengaluru, Karnataka 560070",
+      "geocode": {
+        "longitude": 77.593123,
+        "latitude": 12.919038
+      },
+      "distance": 21.3
+    },
+    {
+      "id": 11,
+      "name": "Dhruv Khandelwal",
+      "address": "827, 17th F1 Main Rd, 6th Block, Koramangala, Bengaluru, Karnataka 560095",
+      "geocode": {
+        "longitude": 77.623708,
+        "latitude": 12.938937
+      },
+      "distance": 26.1
+    },
+    {
+      "id": 12,
+      "name": "Deepak Kogundi",
+      "address": "Outer Ring Road, Sarjapur Main Rd, Electronic City, Bengaluru, Karnataka 561100",
+      "geocode": {
+        "longitude": 77.700572,
+        "latitude": 12.861486
+      },
+      "distance": 8.9
+    },
+    {
+      "id": 13,
+      "name": "Ameya",
+      "address": "62, Kodathi, Bengaluru, Karnataka 560099",
+      "geocode": {
+        "longitude": 77.717875,
+        "latitude": 12.898849
+      },
+      "distance": 13
+    },
+    {
+      "id": 14,
+      "name": "John F. Kennedy",
+      "address": "Bommasandra, Terracon Doctors Enclave, Chandapura, Bommasandra, Karnataka 562107",
+      "geocode": {
+        "longitude": 77.713096,
+        "latitude": 12.796388
+      },
+      "distance": 10.1
+    },
+    {
+      "id": 15,
+      "name": "Akshara",
+      "address": "D/100, Next to BESCOM, Sarjapura Road, Sarjapura - Attibele Rd, Attibele, Karnataka 562107",
+      "geocode": {
+        "longitude": 77.771219,
+        "latitude": 12.782565
+      },
+      "distance": 16.6
+    }
+  ]
+}
