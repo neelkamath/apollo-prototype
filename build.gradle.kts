@@ -15,10 +15,9 @@ dependencies {
     implementation("io.ktor:ktor-gson:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("org.mongodb:mongodb-driver-sync:3.11.1")
+    implementation("com.mapbox.mapboxsdk:mapbox-sdk-services:4.9.0")
     implementation(kotlin("stdlib-jdk8"))
 }
-
-val test by tasks.getting(Test::class) { useJUnitPlatform() }
 
 kotlin.sourceSets { getByName("main").kotlin.srcDirs("src/main") }
 

@@ -8,6 +8,11 @@ You can try out the HTTP API using the development server `https://apollo.heroku
 
 ## Usage
 
+### Deployment
+
+1. `heroku container:push web -a apollo-prototype`
+1. `heroku container:release web -a apollo-prototype`
+
 ### Server
 
 - Development: `./gradlew -t assemble & ./gradlew run`
