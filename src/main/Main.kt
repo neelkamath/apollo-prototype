@@ -3,6 +3,7 @@ package com.neelkamath.apollo
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.mongodb.client.MongoClients
 import com.mongodb.client.model.Filters.eq
 import io.ktor.application.Application
@@ -26,7 +27,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
 import kotlin.math.round
-
 
 private const val database =
     "mongodb://heroku_j2z4kg55:ll047cm6gqbklksejr9orastv1@ds337418.mlab.com:37418/heroku_j2z4kg55"
@@ -67,7 +67,18 @@ internal data class Passenger(val id: String, val longitude: Double, val latitud
 internal enum class Proximity { CLOSE, NORMAL, FAR }
 
 /** [distances] and [durations] are in meters and seconds respectively */
-private data class MatrixResponse(val distances: List<List<Double>>, val durations: List<List<Double>>)
+internal data class MatrixResponse(val distances: List<List<Double>>, val durations: List<List<Double>>)
+
+private data class EtaRequest(
+    @SerializedName("current_longitude")
+    val currentLongitude: Double,
+    @SerializedName("current_latitude")
+    val currentLatitude: Double,
+    @SerializedName("destination_longitude")
+    val destinationLongitude: Double,
+    @SerializedName("destination_latitude")
+    val destinationLatitude: Double
+)
 
 private data class EtaResponse(val eta: Double)
 
@@ -127,7 +138,8 @@ fun Application.main() {
             val destinationPoint = Geocode(longitude, latitude)
             val travellers = getUsers().filter { it.tags.intersect(tags).isNotEmpty() }.map {
                 val dropPoint = Geocode(it.longitude, it.latitude)
-                Data(it.id, it.name, it.address, dropPoint, getMatrix(destinationPoint, dropPoint, Matrix.Distance))
+                val distance = getDistance(destinationPoint, dropPoint)
+                Data(it.id, it.name, it.address, dropPoint, distance)
             }
             val farthestDistance = travellers.map { it.distance }.max()!!
             call.respond(
@@ -140,14 +152,13 @@ fun Application.main() {
                 )
             )
         }
-        get("eta") {
-            val retrieve = { parameter: String -> call.request.queryParameters[parameter]!!.toDouble() }
-            val duration = getMatrix(
-                Geocode(retrieve("current_longitude"), retrieve("current_latitude")),
-                Geocode(retrieve("destination_longitude"), retrieve("destination_latitude")),
-                Matrix.Duration
-            )
-            call.respond(EtaResponse(duration))
+        post("eta") {
+            val matrix = with(call.receive<EtaRequest>()) {
+                getDistance(
+                    Geocode(currentLongitude, currentLatitude), Geocode(destinationLongitude, destinationLatitude)
+                )
+            }
+            call.respond(EtaResponse(matrix))
         }
     }
 }
@@ -207,16 +218,14 @@ private fun getUsers(): List<User> = db.getCollection("users").find().toList().m
 
 private fun geocode(point: Geocode) = with(point) { "$longitude,$latitude" }
 
-internal enum class Matrix { Duration, Distance }
-
-internal suspend fun getMatrix(point1: Geocode, point2: Geocode, matrix: Matrix): Double =
+internal suspend fun getDistance(point1: Geocode, point2: Geocode): Double =
     HttpClient { install(JsonFeature) }.use { client ->
         client.get<String>(
             URI(
                 "https",
                 "api.mapbox.com",
                 "/directions-matrix/v1/mapbox/driving/${geocode(point1)};${geocode(point2)}",
-                "annotations=${if (matrix == Matrix.Distance) "distance" else "duration"}&access_token=$token",
+                "annotations=distance&access_token=$token",
                 null
             ).toString()
         ).let { Gson().fromJson(it, MatrixResponse::class.java) }.distances[0][1]

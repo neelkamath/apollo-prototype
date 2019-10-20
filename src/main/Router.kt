@@ -5,7 +5,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** Pass the institute's [geocode] */
+/** Pass the institute's [geocode]. */
 internal suspend fun writeRoutes(dataset: Dataset, geocode: Geocode): RoutesResponse {
     val routes = RoutesDataset(mutableListOf())
     val radius = with(dataset.arrival) { calculateDistance(geocode, calculateGeocode(geocode, radius)) }
@@ -64,10 +64,10 @@ private suspend fun transformRoutes(dataset: RoutesDataset, geocode: Geocode): R
                     .routes
                     .filter { it.route == passenger.route }
                     .map {
-                        val distance = getMatrix(geocode, it.geocode, Matrix.Distance)
+                        val distance = getDistance(geocode, it.geocode)
                         val proximity = when {
-                            distance < 10 -> Proximity.CLOSE
-                            distance < 20 -> Proximity.NORMAL
+                            distance < 10_000 -> Proximity.CLOSE
+                            distance < 20_000 -> Proximity.NORMAL
                             else -> Proximity.FAR
                         }
                         Passenger(it.id, it.geocode.longitude, it.geocode.latitude, proximity)
@@ -97,7 +97,7 @@ internal data class Geocode(val longitude: Double, val latitude: Double)
 
 internal data class Dataset(val arrival: Arrival, val destinations: List<Data>)
 
-/** [farthestDestination] are [radius] are in kilometers. */
+/** The [farthestDestination] and [radius] are in kilometers. */
 internal data class Arrival(
     val name: String,
     val geocode: Geocode,
@@ -105,7 +105,7 @@ internal data class Arrival(
     val radius: Double
 )
 
-/** [distance] is in km. */
+/** The [distance] is in km. */
 internal data class Data(
     val id: String,
     val name: String,

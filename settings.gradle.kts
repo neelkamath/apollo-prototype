@@ -1,1 +1,1 @@
-rootProject.name = "apollo"
+rootProject.name = "apollo-prototype"

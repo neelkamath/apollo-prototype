@@ -6,12 +6,12 @@ info:
   contact:
     name: Neel Kamath
     email: neelkamath@icloud.com
-    url: https://github.com/neelkamath/apollo
+    url: https://github.com/neelkamath/apollo-prototype
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 servers:
-  - url: https://apollo.herokuapp.com
+  - url: https://apollo-prototype.herokuapp.com
     description: This is a temporary development server which may be offline or serving a different API in the future.
 paths:
   /tag:
@@ -199,35 +199,34 @@ paths:
                       required: [route, passengers]
                 required: [routes]
   /eta:
-    get:
+    post:
       tags: [eta]
       description: The estimated time of arrival
       operationId: eta
-      parameters:
-        - in: query
-          name: current_longitude
-          required: true
-          schema:
-            type: number
-          description: Longitude of the place they are currently in
-        - in: query
-          name: current_latitude
-          required: true
-          schema:
-            type: number
-          description: Latitude of the place they are currently in
-        - in: query
-          name: destination_longitude
-          required: true
-          schema:
-            type: number
-          description: Longitude of the destination
-        - in: query
-          name: destination_latitude
-          required: true
-          schema:
-            type: number
-          description: Latitude of the destination
+      requestBody:
+        content:
+          application/json:
+            example:
+              current_longitude: 77.610995
+              current_latitude: 12.97
+              destination_longitude: 77.6727
+              destination_latitude: 12.8458
+            schema:
+              type: object
+              properties:
+                current_longitude:
+                  type: number
+                  description: Longitude of the place they are currently in
+                current_latitude:
+                  type: number
+                  description: Latitude of the place they are currently in
+                destination_longitude:
+                  type: number
+                  description: Longitude of the destination
+                destination_latitude:
+                  type: number
+                  description: Latitude of the destination
+              required: [current_longitude, current_latitude, destination_longitude, destination_latitude]
       responses:
         200:
           description: ETA
