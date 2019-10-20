@@ -1,5 +1,7 @@
 package com.neelkamath.apollo
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.LoggerContext
 import com.google.gson.Gson
 import com.mongodb.client.MongoClients
 import com.mongodb.client.model.Filters.eq
@@ -20,10 +22,11 @@ import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
 import org.bson.Document
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
-import java.net.URLEncoder
 import kotlin.math.round
+
 
 private const val database =
     "mongodb://heroku_j2z4kg55:ll047cm6gqbklksejr9orastv1@ds337418.mlab.com:37418/heroku_j2z4kg55"
@@ -31,9 +34,9 @@ private val db = MongoClients.create("$database?retryWrites=false").getDatabase(
 private const val token =
     "pk.eyJ1IjoibmVlbGthbWF0aCIsImEiOiJjanp0cHV4cjkwNGVyM21vYXVnYW5oYzU4In0.ioLnaLd2Awv1gMc4kI1FmA"
 
-internal data class TagRequest(val tag: String)
+private data class TagRequest(val tag: String)
 
-internal data class TagResponse(val tags: List<String>)
+private data class TagResponse(val tags: List<String>)
 
 private data class UserRequest(val id: String)
 
@@ -55,21 +58,22 @@ private data class RoutesRequest(
     val tags: List<String>
 )
 
-private data class RoutesResponse(val routes: List<RouteResponse>)
+internal data class RoutesResponse(val routes: MutableList<RouteResponse>)
 
-private data class RouteResponse(val route: Int, val ids: List<String>)
+internal data class RouteResponse(val route: Int, val passengers: MutableList<Passenger>)
 
-private data class GeocodeResponse(val features: List<Feature>)
+internal data class Passenger(val id: String, val longitude: Double, val latitude: Double, val proximity: Proximity)
 
-private data class Feature(val geometry: Geometry)
+internal enum class Proximity { CLOSE, NORMAL, FAR }
 
-/** The distance is most probably in meters. */
-private data class MatrixResponse(val distances: List<List<Double>>)
+/** [distances] and [durations] are in meters and seconds respectively */
+private data class MatrixResponse(val distances: List<List<Double>>, val durations: List<List<Double>>)
 
-/** The [coordinates] are the longitude and latitude respectively. */
-private data class Geometry(val coordinates: List<Double>)
+private data class EtaResponse(val eta: Double)
 
 fun Application.main() {
+    (LoggerFactory.getILoggerFactory() as LoggerContext).getLogger("org.mongodb.driver").level = Level.ERROR
+    seedDb()
     install(CallLogging)
     install(CORS) {
         method(HttpMethod.Options)
@@ -119,32 +123,31 @@ fun Application.main() {
             }
         }
         post("generate") {
-            seedDb()
             val (destination, longitude, latitude, tags) = call.receive<RoutesRequest>()
-            val destinationPoint = Geocode(longitude, latitude) // Using POI: val destinationPoint = getPoi(destination)
+            val destinationPoint = Geocode(longitude, latitude)
             val travellers = getUsers().filter { it.tags.intersect(tags).isNotEmpty() }.map {
-                // Using POI: val dropPoint = getPoi(it.address, destinationPoint)
                 val dropPoint = Geocode(it.longitude, it.latitude)
-
-                Data(it.id, it.name, it.address, dropPoint, getDistance(destinationPoint, dropPoint))
+                Data(it.id, it.name, it.address, dropPoint, getMatrix(destinationPoint, dropPoint, Matrix.Distance))
             }
             val farthestDistance = travellers.map { it.distance }.max()!!
-            val dataset = writeRoutes(
-                Dataset(
-                    Arrival(destination, destinationPoint, farthestDistance, radius = round(farthestDistance + 1)),
-                    travellers
+            call.respond(
+                writeRoutes(
+                    Dataset(
+                        Arrival(destination, destinationPoint, farthestDistance, radius = round(farthestDistance + 1)),
+                        travellers
+                    ),
+                    destinationPoint
                 )
             )
-            val routes = dataset
-                .routes
-                .map { passenger ->
-                    RouteResponse(passenger.route, dataset.routes.filter { it.route == passenger.route }.map { it.id })
-                }
-                .fold(mutableListOf<RouteResponse>()) { responses, response ->
-                    if (response.route in responses.map { it.route }) return@fold responses
-                    responses.apply { add(response) }
-                }
-            call.respond(RoutesResponse(routes))
+        }
+        get("eta") {
+            val retrieve = { parameter: String -> call.request.queryParameters[parameter]!!.toDouble() }
+            val duration = getMatrix(
+                Geocode(retrieve("current_longitude"), retrieve("current_latitude")),
+                Geocode(retrieve("destination_longitude"), retrieve("destination_latitude")),
+                Matrix.Duration
+            )
+            call.respond(EtaResponse(duration))
         }
     }
 }
@@ -202,40 +205,19 @@ private fun getUsers(): List<User> = db.getCollection("users").find().toList().m
     )
 }
 
-/*
- We would've used the POI method (i.e., forward geocoding the human readable address), but free Map APIs don't do it
- well.
- */
-/** The returned POI will be biased towards the [point] if one is present. */
-private suspend fun getPoi(address: String, point: Geocode? = null): Geocode {
-    val proximity = if (point == null) "" else with(point) { "&proximity=$longitude,$latitude" }
-    val response = HttpClient().use {
-        it.get<String>(
-            URI(
-                "https",
-                "api.mapbox.com",
-                "/geocoding/v5/mapbox.places/${URLEncoder.encode(address, "UTF-8")}.json",
-                "limit=1&types=poi$proximity&access_token=$token",
-                null
-            ).toString()
-        )
-    }
-    val body = Gson().fromJson(response, GeocodeResponse::class.java)
-    return body.features[0].geometry.coordinates.let { Geocode(it[0], it[1]) }
-}
+private fun geocode(point: Geocode) = with(point) { "$longitude,$latitude" }
 
-private suspend fun getDistance(point1: Geocode, point2: Geocode): Double {
-    val geocode1 = with(point1) { "$longitude,$latitude" }
-    val geocode2 = with(point2) { "$longitude,$latitude" }
-    return HttpClient { install(JsonFeature) }.use { client ->
+internal enum class Matrix { Duration, Distance }
+
+internal suspend fun getMatrix(point1: Geocode, point2: Geocode, matrix: Matrix): Double =
+    HttpClient { install(JsonFeature) }.use { client ->
         client.get<String>(
             URI(
                 "https",
                 "api.mapbox.com",
-                "/directions-matrix/v1/mapbox/driving/$geocode1;$geocode2",
-                "annotations=distance&access_token=$token",
+                "/directions-matrix/v1/mapbox/driving/${geocode(point1)};${geocode(point2)}",
+                "annotations=${if (matrix == Matrix.Distance) "distance" else "duration"}&access_token=$token",
                 null
             ).toString()
-        ).let { Gson().fromJson(it, MatrixResponse::class.java) }.distances[0].max()!!
+        ).let { Gson().fromJson(it, MatrixResponse::class.java) }.distances[0][1]
     }
-}

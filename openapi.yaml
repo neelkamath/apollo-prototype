@@ -158,7 +158,11 @@ paths:
               example:
                 routes:
                   - route: 1
-                    ids: [PES2201800467]
+                    passengers:
+                      - id: PES2201800467
+                        longitude: 77.56029
+                        latitude: 12.97021
+                        proximity: CLOSE
               schema:
                 type: object
                 properties:
@@ -170,13 +174,74 @@ paths:
                         route:
                           type: integer
                           description: Route number
-                        ids:
+                        passengers:
                           type: array
+                          description: Passengers of this vehicle's route
                           items:
-                            type: string
-                          description: IDs of this route's passengers
-                      required: [route, ids]
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: Passenger's ID
+                              longitude:
+                                type: number
+                                description: The longitude of the passenger's residence
+                              latitude:
+                                type: number
+                                description: The latitude of the passenger's residence
+                              proximity:
+                                type: string
+                                enum: [CLOSE, NORMAL, FAR]
+                                description:
+                                  Whether the passenger's residence is a `"CLOSE"`, `"NORMAL"`, or `"FAR"` distance from
+                                  the institute
+                            required: [id, longitude, latitude, proximity]
+                      required: [route, passengers]
                 required: [routes]
+  /eta:
+    get:
+      tags: [eta]
+      description: The estimated time of arrival
+      operationId: eta
+      parameters:
+        - in: query
+          name: current_longitude
+          required: true
+          schema:
+            type: number
+          description: Longitude of the place they are currently in
+        - in: query
+          name: current_latitude
+          required: true
+          schema:
+            type: number
+          description: Latitude of the place they are currently in
+        - in: query
+          name: destination_longitude
+          required: true
+          schema:
+            type: number
+          description: Longitude of the destination
+        - in: query
+          name: destination_latitude
+          required: true
+          schema:
+            type: number
+          description: Latitude of the destination
+      responses:
+        200:
+          description: ETA
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  eta: 135
+                properties:
+                  eta:
+                    type: number
+                    description: Number of seconds to destination
+                required: [eta]
 components:
   responses:
     TagsResponse:

@@ -5,10 +5,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-internal fun writeRoutes(dataset: Dataset): RoutesDataset {
+/** Pass the institute's [geocode] */
+internal suspend fun writeRoutes(dataset: Dataset, geocode: Geocode): RoutesResponse {
     val routes = RoutesDataset(mutableListOf())
     val radius = with(dataset.arrival) { calculateDistance(geocode, calculateGeocode(geocode, radius)) }
-    val angle = 90
+    val angle = 1
     var route = 1
     for (degrees in 0 until 360 step angle) {
         val sectorStart = calculatePoint(getOrigin(), radius, convertToRadians(degrees))
@@ -29,12 +30,60 @@ internal fun writeRoutes(dataset: Dataset): RoutesDataset {
                 }
             }
     }
-    return routes
+    val response = transformRoutes(routes, geocode)
+    merge(response)
+    return response
 }
 
-internal data class RoutesDataset(val routes: MutableList<Route>)
+/** Transforms the [response] in place. */
+private fun merge(response: RoutesResponse) {
+    val capacity = 4 // Hardcode bus capacity to 4 due to lack of data
+    var mergeComplete = false
+    while (response.routes.size >= 4 && !mergeComplete) {
+        mergeComplete = true
+        for (index in response.routes.indices) {
+            val getIndex = { i: Int -> i % response.routes.size }
+            val passengers = response.routes[getIndex(index)].passengers
+            val nextPassengers = response.routes[getIndex(index + 1)].passengers
+            if (passengers.size + nextPassengers.size <= capacity) {
+                mergeComplete = false
+                passengers.addAll(nextPassengers)
+                response.routes.removeAt(getIndex(index + 1))
+            }
+        }
+    }
+}
 
-internal data class Route(val route: Int, val geocode: Geocode, val id: String)
+/** Pass the [geocode] of the institute controlling the [dataset]. */
+private suspend fun transformRoutes(dataset: RoutesDataset, geocode: Geocode): RoutesResponse = RoutesResponse(
+    dataset.routes
+        .map { passenger ->
+            RouteResponse(
+                passenger.route,
+                dataset
+                    .routes
+                    .filter { it.route == passenger.route }
+                    .map {
+                        val distance = getMatrix(geocode, it.geocode, Matrix.Distance)
+                        val proximity = when {
+                            distance < 10 -> Proximity.CLOSE
+                            distance < 20 -> Proximity.NORMAL
+                            else -> Proximity.FAR
+                        }
+                        Passenger(it.id, it.geocode.longitude, it.geocode.latitude, proximity)
+                    }
+                    .toMutableList()
+            )
+        }
+        .fold(mutableListOf()) { responses, response ->
+            if (response.route in responses.map { it.route }) return@fold responses
+            responses.apply { add(response) }
+        }
+)
+
+private data class RoutesDataset(val routes: MutableList<Route>)
+
+private data class Route(val route: Int, val geocode: Geocode, val id: String)
 
 private fun calculateDistance(point1: Geocode, point2: Geocode): Double {
     val abscissa = point1.longitude - point2.longitude
