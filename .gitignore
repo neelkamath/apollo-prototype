@@ -1,5 +1,5 @@
 .gradle/
 .idea/
 build/
+apollo.html
 .DS_Store
-redoc-static.html

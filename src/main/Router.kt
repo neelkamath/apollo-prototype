@@ -1,20 +1,16 @@
 package com.neelkamath.apollo
 
-import com.google.gson.Gson
-import java.io.File
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-fun main() {
-    val path = "src/main/resources/routes.json"
-    File(path).writeText("""{"routes": []}""")
-    val dataset = Gson().fromJson(File("src/main/resources/data.json").readText(), Dataset::class.java)
+internal fun writeRoutes(dataset: Dataset): RoutesDataset {
+    val routes = RoutesDataset(mutableListOf())
     val radius = with(dataset.arrival) { calculateDistance(geocode, calculateGeocode(geocode, radius)) }
     val angle = 90
     var route = 1
-    for (degrees in 0..360 step angle) {
+    for (degrees in 0 until 360 step angle) {
         val sectorStart = calculatePoint(getOrigin(), radius, convertToRadians(degrees))
         val sectorEnd = calculatePoint(getOrigin(), radius, convertToRadians(degrees + angle))
         dataset.destinations
@@ -26,18 +22,19 @@ fun main() {
             .filter { isInsideSector(it.value, getOrigin(), sectorStart, sectorEnd, radius * radius) }
             .also { coordinates ->
                 if (coordinates.isNotEmpty()) {
-                    val routesDataset = Gson().fromJson(File(path).readText(), RoutesDataset::class.java)
-                    for (coordinate in coordinates) routesDataset.routes.add(Route(route, coordinate.key.geocode))
-                    File(path).writeText(Gson().toJson(routesDataset))
+                    for (coordinate in coordinates) {
+                        routes.routes.add(Route(route, coordinate.key.geocode, coordinate.key.id))
+                    }
                     route++
                 }
             }
     }
+    return routes
 }
 
-private data class RoutesDataset(val routes: MutableList<Route>)
+internal data class RoutesDataset(val routes: MutableList<Route>)
 
-private data class Route(val route: Int, val geocode: Geocode)
+internal data class Route(val route: Int, val geocode: Geocode, val id: String)
 
 private fun calculateDistance(point1: Geocode, point2: Geocode): Double {
     val abscissa = point1.longitude - point2.longitude
@@ -47,12 +44,12 @@ private fun calculateDistance(point1: Geocode, point2: Geocode): Double {
 
 private fun getOrigin() = Geocode(.0, .0)
 
-private data class Geocode(val longitude: Double, val latitude: Double)
+internal data class Geocode(val longitude: Double, val latitude: Double)
 
-private data class Dataset(val arrival: Arrival, val destinations: List<Data>)
+internal data class Dataset(val arrival: Arrival, val destinations: List<Data>)
 
 /** [farthestDestination] are [radius] are in kilometers. */
-private data class Arrival(
+internal data class Arrival(
     val name: String,
     val geocode: Geocode,
     val farthestDestination: Double,
@@ -60,8 +57,8 @@ private data class Arrival(
 )
 
 /** [distance] is in km. */
-private data class Data(
-    val id: Int,
+internal data class Data(
+    val id: String,
     val name: String,
     val address: String,
     val geocode: Geocode,

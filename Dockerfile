@@ -1,16 +1,6 @@
-FROM openjdk:8 AS builder
-WORKDIR /app
-COPY gradle/ gradle/
-COPY src/main/ src/main/
-COPY build.gradle.kts gradle.properties gradlew settings.gradle.kts ./
-RUN ./gradlew shadowJar --no-daemon
-
 FROM openjdk:8-jre-alpine
-RUN apk --no-cache add curl
-COPY --from=builder /app/build/libs/*.jar apollo-all.jar
-COPY --from=builder /app/build/resources/main/ src/main/resources/
-ENV PORT 80
-EXPOSE 80
+WORKDIR /app
+COPY ./build/libs/apollo-all.jar /app/apollo-all.jar
 CMD [ \
     "java", \
     "-server", \

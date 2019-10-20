@@ -38,7 +38,7 @@ paths:
                   type: string
               required: [tag]
       responses:
-        200:
+        204:
           description: Created tag
     delete:
       tags: [tag]
@@ -56,7 +56,7 @@ paths:
                   type: string
               required: [tag]
       responses:
-        200:
+        204:
           description: Tag deleted
   /user:
     get:
@@ -77,6 +77,8 @@ paths:
               name: Neel Kamath
               id: PES2201800467
               address: 311/3, 23rd Cross, 2nd Main, 6th Block, Jayanagar, Bangalore, Karnataka, India
+              longitude: 77.6727
+              latitude: 12.8458
               tags: [2nd Year, CSE]
             schema:
               type: object
@@ -87,13 +89,17 @@ paths:
                   type: string
                 address:
                   type: string
+                longitude:
+                  type: number
+                latitude:
+                  type: number
                 tags:
                   type: array
                   items:
                     type: string
-              required: [name, id, tags, address]
+              required: [name, id, tags, address, longitude, latitude]
       responses:
-        200:
+        204:
           description: Created user
     delete:
       tags: [user]
@@ -111,7 +117,7 @@ paths:
                   type: string
               required: [id]
       responses:
-        200:
+        204:
           description: User deleted
   /generate:
     post:
@@ -122,16 +128,28 @@ paths:
         content:
           application/json:
             example:
+              address: PESU, Electronic City Campus
+              longitude: 77.6727
+              latitude: 12.8458
               tags: [CSE, 2nd Semester]
             schema:
               type: object
               properties:
+                address:
+                  description: The address of the college, etc. the buses are being driven to
+                  type: string
+                longitude:
+                  description: The longitude of the college, etc. the buses are being driven to
+                  type: number
+                latitude:
+                  description: The latitude of the college, etc. the buses are being driven to
+                  type: number
                 tags:
                   description: The bus routes will be generated only for people having these tags.
                   type: array
                   items:
                     type: string
-              required: [tags]
+              required: [tags, address, longitude, latitude]
       responses:
         200:
           description: Generated routes
@@ -140,8 +158,7 @@ paths:
               example:
                 routes:
                   - route: 1
-                    name: Neel Kamath
-                    id: PES2201800467
+                    ids: [PES2201800467]
               schema:
                 type: object
                 properties:
@@ -153,13 +170,12 @@ paths:
                         route:
                           type: integer
                           description: Route number
-                        name:
-                          type: string
-                          description: Name of person going in this route
-                        id:
-                          type: string
-                          description: id of person going in this route
-                      required: [route, name, id]
+                        ids:
+                          type: array
+                          items:
+                            type: string
+                          description: IDs of this route's passengers
+                      required: [route, ids]
                 required: [routes]
 components:
   responses:
@@ -187,6 +203,8 @@ components:
                 - name: Neel Kamath
                   id: PES2201800467
                   address: 311/3, 23rd Cross, 2nd Main, 6th Block, Jayanagar, Bangalore, Karnataka, India
+                  longitude: 77.6727
+                  latitude: 12.8458
                   tags: [CSE, 2nd Year]
             properties:
               users:
@@ -200,9 +218,13 @@ components:
                       type: string
                     address:
                       type: string
+                    longitude:
+                      type: number
+                    latitude:
+                      type: number
                     tags:
                       type: array
                       items:
                         type: string
-                  required: [name, id, tags, address]
+                  required: [name, id, tags, address, longitude, latitude]
             required: [users]

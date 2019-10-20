@@ -10,8 +10,8 @@ You can try out the HTTP API using the development server `https://apollo.heroku
 
 ### Deployment
 
-1. `heroku container:push web -a apollo-prototype`
-1. `heroku container:release web -a apollo-prototype`
+1. `chmod +x release.sh`
+1. `./release.sh`
 
 ### Server
 
@@ -25,7 +25,7 @@ You can try out the HTTP API using the development server `https://apollo.heroku
 ### Documentation  
     
 - Development: `redoc-cli serve openapi.yaml -w`
-- Production: `redoc-cli bundle openapi.yaml -o redoc-static.html --title 'Apollo'`
+- Production: `redoc-cli bundle openapi.yaml -o apollo.html --title 'Apollo'`
 - Test: `spectral lint openapi.yaml`
 
 ## License

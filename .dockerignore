@@ -1,7 +1,2 @@
 *
-!gradle/
-!src/main/
-!build.gradle.kts
-!gradle.properties
-!gradlew
-!settings.gradle.kts
+!build/libs/apollo-all.jar

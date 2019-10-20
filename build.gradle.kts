@@ -13,9 +13,12 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-gson:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-gson:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("org.mongodb:mongodb-driver-sync:3.11.1")
-    implementation("com.mapbox.mapboxsdk:mapbox-sdk-services:4.9.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 
