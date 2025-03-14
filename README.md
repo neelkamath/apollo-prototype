@@ -2,7 +2,7 @@
 
 ![Bus](bus.jpg)
 
-This prototype was built at the hackathon [InOut 6.0](https://hackinout.co/). This is a server which generates bus routes. My teammate [Ashik](https://github.com/ashikmeerankutty/apollo) made the [frontend](https://apollo-project.surge.sh/). The project is named Apollo, after the Greek god from whom travelers would seek favor from.
+This prototype was built at the hackathon [InOut 6.0](https://hackinout.co/). This is a server which generates bus routes. My teammate [Ashik](https://github.com/ashikmeerankutty/apollo) made the [frontend](https://apollo-project.surge.sh/). You can see the demo [here](https://neelkamath.notion.site/hackbout-admin-panel-demo). The project is named Apollo, after the Greek god from whom travelers would seek favor from.
 
 This project is a hack for the _Future Mobility_ track. Transit for masses currently sucks. Since humans plan the routes, changing them is slow, expensive, and impossible to modify on a day-to-day basis. Since Apollo is a program, it can easily be used to generate the most optimal routes on demand. Usually, both students and administrators had unnecessary inefficiencies for days such as when only a particular part of the school wasn't using the bus (e.g., on a day in which only middle school children have exams). Now, the institution doesn't need to waste fuel on partially empty vehicles, the drivers don't need to waste time figuring out who they have to wait to pick up or drop off on a particular day, and the passengers needn't take meaninglessly longer trips.
 
